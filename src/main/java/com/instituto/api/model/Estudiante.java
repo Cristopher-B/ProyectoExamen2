@@ -4,30 +4,41 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-@Getter @Setter
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "estudiantes")
 public class Estudiante {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @NotBlank(message = "La cédula es obligatoria")
+    @Size(min = 10, message = "La cédula debe tener al menos 10 dígitos")
+    @Column(unique = true)
+    private String cedula;
+
     @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
     private String nombre;
 
+    @NotBlank(message = "El apellido es obligatorio")
+    private String apellido;
+
     @NotBlank(message = "El email es obligatorio")
-    @Email(message = "Debe proporcionar un formato de email válido")
+    @Email(message = "Debe incluir un '@' y un dominio válido")
     @Column(unique = true)
     private String email;
 
-    @Min(value = 16, message = "La edad mínima permitida es 16 años")
-    @Max(value = 60, message = "La edad máxima permitida es 60 años")
-    private int edad;
-
     @NotBlank(message = "La carrera es obligatoria")
+    @Pattern(
+            regexp = "Administración|Marketing|Contabilidad|Farmacia|Desarrollo de software|Turismo",
+            message = "Carrera no válida. Debe ser una de las preestablecidas."
+    )
     private String carrera;
+
+    @Min(18)
+    @Max(60)
+    private int edad;
 }
