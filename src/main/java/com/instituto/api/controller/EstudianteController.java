@@ -37,6 +37,14 @@ public class EstudianteController {
         return ResponseEntity.ok(service.updateEstudiante(id, estudiante));
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Estudiante> patch(
+            @PathVariable Long id,
+            @RequestBody Estudiante estudiante) {
+
+        return ResponseEntity.ok(service.updateEstudiante(id, estudiante));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
         service.deleteEstudiante(id);

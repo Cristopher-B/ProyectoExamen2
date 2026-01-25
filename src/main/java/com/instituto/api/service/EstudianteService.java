@@ -36,17 +36,39 @@ public class EstudianteService implements IEstudianteService {
 
     @Override
     public Estudiante updateEstudiante(Long id, Estudiante detalles) {
+
         Estudiante existente = this.findEstudiante(id);
 
-        formatearNombres(detalles);
+        // Validar duplicados SOLO si vienen esos campos
         validarDuplicados(detalles, id);
 
-        existente.setCedula(detalles.getCedula());
-        existente.setNombre(detalles.getNombre());
-        existente.setApellido(detalles.getApellido());
-        existente.setEmail(detalles.getEmail());
-        existente.setCarrera(detalles.getCarrera());
-        existente.setEdad(detalles.getEdad());
+        // Actualizar solo los campos enviados
+        if (detalles.getCedula() != null) {
+            existente.setCedula(detalles.getCedula());
+        }
+
+        if (detalles.getNombre() != null) {
+            existente.setNombre(detalles.getNombre());
+        }
+
+        if (detalles.getApellido() != null) {
+            existente.setApellido(detalles.getApellido());
+        }
+
+        if (detalles.getEmail() != null) {
+            existente.setEmail(detalles.getEmail());
+        }
+
+        if (detalles.getCarrera() != null) {
+            existente.setCarrera(detalles.getCarrera());
+        }
+
+        if (detalles.getEdad() != 0) {
+            existente.setEdad(detalles.getEdad());
+        }
+
+        // Formatear solo lo que existe ya actualizado
+        formatearNombres(existente);
 
         return repo.save(existente);
     }
