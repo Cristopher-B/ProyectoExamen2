@@ -9,4 +9,5 @@ public interface IEstudianteService {
     Estudiante saveEstudiante(Estudiante estudiante);
     Estudiante updateEstudiante(Long id, Estudiante estudiante);
     void deleteEstudiante(Long id);
+    Estudiante patchEstudiante(Long id, Estudiante detalles);
 }

@@ -21,10 +21,9 @@ public class EstudianteService implements IEstudianteService {
 
     @Override
     public Estudiante findEstudiante(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Estudiante no encontrado con id: " + id)
-                );
+        return repo.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Estudiante no encontrado con id: " + id)
+        );
     }
 
     @Override
@@ -38,39 +37,72 @@ public class EstudianteService implements IEstudianteService {
     public Estudiante updateEstudiante(Long id, Estudiante detalles) {
 
         Estudiante existente = this.findEstudiante(id);
-
-        // Validar duplicados SOLO si vienen esos campos
         validarDuplicados(detalles, id);
 
-        // Actualizar solo los campos enviados
         if (detalles.getCedula() != null) {
             existente.setCedula(detalles.getCedula());
         }
-
         if (detalles.getNombre() != null) {
             existente.setNombre(detalles.getNombre());
         }
-
         if (detalles.getApellido() != null) {
             existente.setApellido(detalles.getApellido());
         }
-
         if (detalles.getEmail() != null) {
             existente.setEmail(detalles.getEmail());
         }
-
         if (detalles.getCarrera() != null) {
             existente.setCarrera(detalles.getCarrera());
         }
-
         if (detalles.getEdad() != 0) {
             existente.setEdad(detalles.getEdad());
         }
-
-        // Formatear solo lo que existe ya actualizado
         formatearNombres(existente);
-
         return repo.save(existente);
+    }
+
+    @Override
+    public Estudiante patchEstudiante(Long id, Estudiante detalles) {
+        Estudiante existente = this.findEstudiante(id);
+
+        if (detalles.getCedula() != null && !detalles.getCedula().equals(existente.getCedula())) {
+            if (detalles.getCedula().length() != 10) {
+                throw new IllegalArgumentException("La nueva cédula debe tener 10 dígitos");
+            }
+            validarCedulaUnica(detalles.getCedula(), id);
+            existente.setCedula(detalles.getCedula());
+        }
+
+        if (detalles.getEmail() != null && !detalles.getEmail().equals(existente.getEmail())) {
+            validarEmailUnico(detalles.getEmail(), id);
+            existente.setEmail(detalles.getEmail());
+        }
+
+        if (detalles.getNombre() != null) existente.setNombre(detalles.getNombre());
+        if (detalles.getApellido() != null) existente.setApellido(detalles.getApellido());
+        if (detalles.getCarrera() != null) {
+            if (detalles.getCarrera().matches("Administración|Marketing|Contabilidad|Farmacia|Desarrollo de software|Turismo")) {
+                existente.setCarrera(detalles.getCarrera());
+            } else {
+                throw new IllegalArgumentException("Carrera no permitida");
+            }
+        }
+        if (detalles.getEdad() >= 18 && detalles.getEdad() <= 60) {
+            existente.setEdad(detalles.getEdad());
+        }
+
+        formatearNombres(existente);
+        return repo.save(existente);
+    }
+
+    private void validarCedulaUnica(String cedula, Long id) {
+        repo.findByCedula(cedula).filter(e -> !e.getId().equals(id))
+                .ifPresent(e -> { throw new IllegalArgumentException("La cédula ya existe"); });
+    }
+
+    private void validarEmailUnico(String email, Long id) {
+        repo.findByEmail(email).filter(e -> !e.getId().equals(id))
+                .ifPresent(e -> { throw new IllegalArgumentException("El email ya existe"); });
     }
 
     @Override
@@ -78,10 +110,6 @@ public class EstudianteService implements IEstudianteService {
         Estudiante estudiante = this.findEstudiante(id);
         repo.delete(estudiante);
     }
-
-    // ===============================
-    // VALIDACIONES DE NEGOCIO
-    // ===============================
 
     private void validarDuplicados(Estudiante estudiante, Long idActual) {
 
@@ -116,10 +144,6 @@ public class EstudianteService implements IEstudianteService {
             }
         }
     }
-
-    // ===============================
-    // FORMATO
-    // ===============================
 
     private void formatearNombres(Estudiante estudiante) {
         estudiante.setNombre(capitalizarTexto(estudiante.getNombre()));
