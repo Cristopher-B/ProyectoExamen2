@@ -15,7 +15,7 @@ import lombok.Setter;
 public class Estudiante {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "La cédula es obligatoria")
